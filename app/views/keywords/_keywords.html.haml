@@ -1,0 +1,66 @@
+%table.table
+  %thead
+    %tr
+      %th.no-sort
+      %th
+        = link_to sort: :keyword, direction: sort_direction('keyword'), filter: params[:filter], remote: true do
+          = t('views.keywords.tables.headings.keyword')
+      %th
+        = link_to sort: :volume, direction: sort_direction('volume'), filter: params[:filter], remote: true do
+          = t('views.keywords.tables.headings.volume')
+      %th
+        = link_to sort: 'keyword_histories.position', direction: sort_direction('keyword_histories.position'), filter: params[:filter], remote: true do
+          = t('views.keywords.tables.headings.position')
+      %th
+        = link_to sort: 'keyword_histories.page', direction: sort_direction('keyword_histories.page'), filter: params[:filter], remote: true do
+          = t('views.keywords.tables.headings.page')
+      %th
+        = t('views.keywords.tables.headings.1_day_change')
+      %th
+        = t('views.keywords.tables.headings.7_day_change')
+      %th
+        = t('views.keywords.tables.headings.30_day_change')
+  %tbody
+    - @keywords.each do |keyword|
+      - history = keyword.keyword_histories.order(created_at: :asc).last
+      - today = today(keyword)
+      %tr
+        %td
+          %a.show-large-chart-1{ href: '#', data: { target: '#row-expand-1', toggle: '', keyboard: 'false', backdrop: 'static' } }
+            %img{ src: asset_path('chart-active.png'), height: 20 }
+        %td
+          = keyword.keyword
+        %td
+          - if keyword.volume
+            = keyword.volume
+          - else
+            %a.btn.btn-info{ href: '' }
+              %span
+                = t('views.keywords.labels.processing')
+        %td
+          - if history.present?
+            = position_label(today.position)
+          - else
+            %a.btn.btn-info{ href: '' }
+              %span
+                = t('views.keywords.labels.processing')
+        %td
+          - if history.present?
+            = page_label(today.page)
+          - else
+            %a.btn.btn-info{ href: '' }
+              %span
+                = t('views.keywords.labels.processing')
+        %td
+          = one_day_change(keyword)
+        %td
+          = seven_day_change(keyword)
+        %td
+          = thirty_day_change(keyword)
+      %tr.row-expand{ style: 'padding-top: 30px; padding-bottom: 30px; display: none;' }
+        %td{ colspan: '11' }
+          = no_data_label(:keywords, keyword)
+          - if data_available?(:keywords, keyword)
+            .chart-large.sparkline{ data: { chart_strokecolor: '#ECEDEF', chart_values: [position_data_for_chart(keyword)].to_json.html_safe }, id: "chart-large-#{keyword.id}" }
+          - else
+            %canvas

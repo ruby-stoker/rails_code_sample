@@ -1,0 +1,88 @@
+- tracking_link = "/products/#{@product.id}/keywords/tracking"
+#nav-wrap
+  .nav-inner
+    .row
+      .col-xs-6.col-sm-6.col-md-6
+        .nav-left-sec
+          .dropdown#product-select
+            %img{ src: asset_path('arrow-right.png'), width: 20 }
+            %a.dropdown-toggle{ href: '#product-select-modal', 'aria-expanded': true, data: { 'toggle' => 'modal' } }
+              = image_tag ssl_image(@product.image), height: 55
+              %span.blank
+                = @product.name
+              %span.product-sku
+            %img{ src: asset_path('arrow-updown.png'), width: 7 }
+            %a.view-on-amazon{ href: "#{@product.account.marketplace.amazon_url}/dp/#{@product.asin}", target: '_blank' }
+              %i.fa.fa-amazon.fa-2x{ 'aria-hidden': true, alt: t('views.products.labels.view_on_amazon'), title: t('views.products.labels.view_on_amazon') }
+      .col-xs-6.col-sm-6.col-md-6
+        .nav-right-sec.pull-right
+          %ul
+            %li.active
+              %a{ href: keywords_tracking_product_path(@product) }
+                = t('views.keywords.menu.tracking')
+            %li
+              %a{ href: keywords_analysis_product_path(@product) }
+                = t('views.keywords.menu.page_analysis')
+            %li
+              %a{ href: keywords_matrix_product_path(@product) }
+                = t('views.keywords.menu.matrix')
+/ nav end
+#main
+  #keywords-page
+    .container
+      .row
+        = render partial: 'sparklines'
+      .row
+        .chartist-wrapper
+          .col-xs-6.col-sm-6.col-md-6
+            .col-xs-3.col-sm-3.col-md-3
+              .test-top-left
+                %ul.clearfix
+                  %li
+                    %a#new-abtest-btn{ href: '#', data: { backdrop: 'static', keyboard: false, target: '#keyword-modal', toggle: 'modal' } }
+                      = t('views.keywords.buttons.add_edit')
+            .col-xs-3.col-sm-3.col-md-3
+              .test-top-left
+                %ul.clearfix
+                  %li
+                    %a#refresh-btn{ href: keywords_refresh_product_path(@product), data: { remote: true, method: 'post' } }
+                      = t('views.keywords.buttons.refresh')
+          .col-xs-6.col-sm-6.col-md-6
+            .test-top-right
+              %ul.clearfix
+                %li.time
+                  - unless @keywords.blank?
+                    - if @history && @history.try(:updated_at)
+                      = t('views.keywords.labels.last_updated')
+                      = @history.updated_at.strftime('%H:%M:%S %b %d, %Y').upcase
+                      %i.fa.fa-clock-o
+                %li
+                  %a{ href: 'javascript:;' } show
+                %li
+                  %a.filter-limit.active{ href: "#{tracking_link}?limit=10", data: { remote: '' } } 10
+                %li
+                  %a.filter-limit{ href: "#{tracking_link}?limit=25", data: { remote: '' } } 25
+                %li
+                  %a.filter-limit{ href: "#{tracking_link}?limit=50", data: { remote: '' } } 50
+                %li
+                  %a.filter-limit{ href: "#{tracking_link}?limit=100", data: { remote: '' } } 100
+                %li
+                  %a{ data: { toggle: 'modal' }, href: '#keywords-tracking-help-modal' }
+                    %span.help
+                      %i.fa.fa-question-circle
+      .row
+        .col-xs-12.col-sm-12.col-md-12
+          .product-table-sec
+            = render 'keywords'
+          .product-bot-sec
+            .row
+              .col-xs-4.col-sm-4.col-md-4
+                .product-bot-left
+                  %a{ href: '#' }
+                    = t('views.keywords.labels.back_to_top')
+              .col-xs-8.col-sm-8.col-md-8
+                #paginator
+                  = render partial: 'pagination'
+= render partial: 'keyword_modal'
+= render partial: 'products/product_select_modal'
+= render partial: 'keywords_tracking_help_modal'
